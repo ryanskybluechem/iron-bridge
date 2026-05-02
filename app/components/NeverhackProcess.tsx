@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import ScrollShader from "./ScrollShader";
 import { DEFAULT_PARAMS, type ShaderParams } from "./shaderParams";
 
@@ -137,9 +137,21 @@ export default function NeverhackProcess({ steps }: Props) {
               </div>
               <div className="nh-slide-kicker">{s.k}</div>
               <h3 className="nh-slide-title">
-                <span className="nh-slide-title-mask">
-                  <span className="nh-slide-title-inner">{s.t}</span>
-                </span>
+                {s.t.split(/\s+/).map((w, wi, arr) => (
+                  <Fragment key={wi}>
+                    <span className="nh-title-word">
+                      <span
+                        className="nh-title-word-inner"
+                        style={{
+                          ["--wd" as string]: `${180 + wi * 70}ms`,
+                        }}
+                      >
+                        {w}
+                      </span>
+                    </span>
+                    {wi < arr.length - 1 ? " " : null}
+                  </Fragment>
+                ))}
               </h3>
               <p className="nh-slide-desc">{s.d}</p>
             </article>

@@ -136,6 +136,27 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   .split-mask .sm-word-inner { transform: none !important; transition: none; }
 }
 
+/* ─── Scroll-split-mask: like split-mask, but each word's
+   reveal progress is tied to scroll position. JS sets
+   translateY directly per frame; no CSS transition. */
+.scroll-split-mask {
+  display: inline;
+}
+.scroll-split-mask .ssm-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.05;
+}
+.scroll-split-mask .ssm-word-inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-split-mask .ssm-word-inner { transform: none !important; }
+}
+
 /* ─── Scroll-fill text ─────────────────────────────────
    Apple-style word-by-word fade as the line passes through
    the viewport. Each word's --p (0..1) is set by JS based
@@ -1007,7 +1028,9 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   margin-bottom: 18px;
 }
 
-/* Title rises up from a clip mask when the slide becomes active. */
+/* Title — each word rises from its own clip mask, staggered, when the
+   slide becomes active. Spaces between words are normal text so wrap
+   stays natural. */
 .nh-slide-title {
   font-size: clamp(48px, 7.6vw, 116px);
   line-height: 0.96;
@@ -1016,19 +1039,26 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   text-wrap: balance;
   max-width: 18ch;
 }
-.nh-slide-title-mask {
-  display: block;
+.nh-title-word {
+  display: inline-block;
   overflow: hidden;
+  vertical-align: bottom;
   padding-bottom: 0.06em;
+  line-height: 1.0;
 }
-.nh-slide-title-inner {
-  display: block;
-  transform: translate3d(0, 105%, 0);
-  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+.nh-title-word-inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0ms;
   will-change: transform;
 }
-.nh-slide--active .nh-slide-title-inner {
+.nh-slide--active .nh-title-word-inner {
   transform: translate3d(0, 0, 0);
+  transition-delay: var(--wd, 0ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nh-title-word-inner { transform: none !important; transition: none; }
 }
 
 .nh-slide-desc {
