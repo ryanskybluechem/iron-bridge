@@ -232,6 +232,20 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   50% { opacity: 1; transform: scaleY(1); }
 }
 
+@media (max-width: 700px) {
+  .hero-content { padding: 140px 20px 140px; }
+  .hero-actions { gap: 10px; }
+  .hero-actions .btn { width: 100%; justify-content: center; }
+  .hero-stats {
+    margin-top: 56px;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 28px;
+  }
+  .stat-div { display: none; }
+  .hero-scroll { display: none; }
+}
+
 /* ─── Trust ──────────────────────────────────────────── */
 .trust {
   background: var(--ink);
