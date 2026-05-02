@@ -1,3 +1,4 @@
+import Link from "next/link";
 import HeroShaderClient from "./components/HeroShaderClient";
 import HeroBridge from "./components/HeroBridge";
 import HeroStats from "./components/HeroStats";
@@ -5,11 +6,13 @@ import Telemetry from "./components/Telemetry";
 import Marquee from "./components/Marquee";
 import Reveal from "./components/Reveal";
 import FAQ from "./components/FAQ";
-import NewsletterForm from "./components/NewsletterForm";
 import ScrollFillText from "./components/ScrollFillText";
 import MaskReveal from "./components/MaskReveal";
 import NeverhackProcess from "./components/NeverhackProcess";
 import ProcessIntro from "./components/ProcessIntro";
+import SiteNav from "./components/SiteNav";
+import SiteFooter from "./components/SiteFooter";
+import { ARTICLES, formatDate } from "./articles/data";
 import {
   TaxProjectionCalc,
   RunwayCalc,
@@ -113,24 +116,6 @@ const steps = [
   },
 ];
 
-const articles = [
-  {
-    tag: "Tax strategy",
-    t: "The June 1st projection: why timing beats tactics",
-    r: "6 min read",
-  },
-  {
-    tag: "Cash flow",
-    t: "When to take distributions vs. reinvest: a CFO framework",
-    r: "9 min read",
-  },
-  {
-    tag: "M&A",
-    t: "What buyers actually look at in your last three years of books",
-    r: "12 min read",
-  },
-];
-
 const cases = [
   {
     industry: "Manufacturing",
@@ -192,26 +177,7 @@ const fmt = (n: number) => "$" + n.toLocaleString("en-US");
 export default function Page() {
   return (
     <>
-      <nav className="nav">
-        <div className="nav-inner">
-          <a className="brand" href="#">
-            <BrandMark />
-            <span>Iron Bridge</span>
-          </a>
-          <div className="nav-links">
-            <a href="#services">Services</a>
-            <a href="#calculators">Tools</a>
-            <a href="#process">Process</a>
-            <a href="#cases">Results</a>
-            <a href="#team">Team</a>
-            <a href="#faq">FAQ</a>
-          </div>
-          <a href="#contact" className="nav-cta">
-            Schedule consultation
-            <Arrow />
-          </a>
-        </div>
-      </nav>
+      <SiteNav />
 
       {/* ─── Hero ────────────────────────────────────────────── */}
       <header className="hero">
@@ -711,23 +677,23 @@ export default function Page() {
                   Field notes <em className="serif">from the engagements.</em>
                 </h2>
               </div>
-              <a href="#" className="link-arrow">
+              <Link href="/articles" className="link-arrow">
                 All articles <span>→</span>
-              </a>
+              </Link>
             </div>
           </MaskReveal>
 
           <div className="articles-grid">
-            {articles.map((a, i) => (
-              <Reveal key={i} delay={i * 60}>
-                <a className="article-card" href="#">
+            {ARTICLES.slice(0, 3).map((a, i) => (
+              <Reveal key={a.slug} delay={i * 60}>
+                <Link className="article-card" href={`/articles/${a.slug}`}>
                   <div className="article-tag">{a.tag}</div>
-                  <h3 className="article-title">{a.t}</h3>
+                  <h3 className="article-title">{a.title}</h3>
                   <div className="article-meta">
-                    <span>{a.r}</span>
+                    <span>{a.readTime}</span>
                     <span className="article-arrow">→</span>
                   </div>
-                </a>
+                </Link>
               </Reveal>
             ))}
           </div>
@@ -812,63 +778,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ─── Footer ──────────────────────────────────────────── */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-top">
-            <div className="footer-mark">
-              <a className="brand brand-large" href="#">
-                <BrandMark size={32} />
-                <span>Iron Bridge Solutions</span>
-              </a>
-              <p className="footer-tag">
-                CFO &amp; tax strategy for owner-operated businesses.
-              </p>
-            </div>
-            <NewsletterForm />
-          </div>
-
-          <div className="footer-grid">
-            <div>
-              <div className="footer-h">Services</div>
-              <a href="#">CFO services</a>
-              <a href="#">Tax strategy</a>
-              <a href="#">M&amp;A advisory</a>
-              <a href="#">Capital sourcing</a>
-            </div>
-            <div>
-              <div className="footer-h">Company</div>
-              <a href="#">About</a>
-              <a href="#">Team</a>
-              <a href="#">Articles</a>
-              <a href="#">Newsletter</a>
-            </div>
-            <div>
-              <div className="footer-h">Tools</div>
-              <a href="#calculators">Tax projection</a>
-              <a href="#calculators">Cash-flow runway</a>
-              <a href="#calculators">Entity comparator</a>
-            </div>
-            <div>
-              <div className="footer-h">Contact</div>
-              <a href="mailto:dyoung@ironbridgesolution.com">
-                dyoung@ironbridgesolution.com
-              </a>
-              <a href="tel:8013896558">801-389-6558</a>
-              <span className="footer-addr">
-                205 26th Street STE 24
-                <br />
-                Ogden, UT 84401
-              </span>
-            </div>
-          </div>
-
-          <div className="footer-bar">
-            <span>© 2026 Iron Bridge Solutions. All rights reserved.</span>
-            <span>Built with intention.</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
