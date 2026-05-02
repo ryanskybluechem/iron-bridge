@@ -1,4 +1,4 @@
-import HeroShader from "./components/HeroShader";
+import HeroShaderClient from "./components/HeroShaderClient";
 import HeroBridge from "./components/HeroBridge";
 import HeroStats from "./components/HeroStats";
 import Telemetry from "./components/Telemetry";
@@ -213,7 +213,7 @@ export default function Page() {
       {/* ─── Hero ────────────────────────────────────────────── */}
       <header className="hero">
         <div className="hero-shader">
-          <HeroShader />
+          <HeroShaderClient />
         </div>
         <HeroBridge />
         <div className="hero-grain" />
@@ -483,7 +483,7 @@ export default function Page() {
       {/* ─── Pull quote ──────────────────────────────────────── */}
       <section className="pullquote">
         <div className="pullquote-shader">
-          <HeroShader intensity={0.7} />
+          <HeroShaderClient intensity={0.7} />
         </div>
         <div className="container">
           <div className="quote-mark">“</div>
@@ -778,7 +778,7 @@ export default function Page() {
       {/* ─── Contact / CTA ───────────────────────────────────── */}
       <section className="cta" id="contact">
         <div className="cta-shader">
-          <HeroShader intensity={0.85} />
+          <HeroShaderClient intensity={0.85} />
         </div>
         <div className="container">
           <div className="cta-grid">
