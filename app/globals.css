@@ -53,6 +53,33 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
 /* selection */
 ::selection { background: var(--copper); color: var(--ink); }
 
+/* ─── Scroll-fill text ─────────────────────────────────
+   Apple-style word-by-word fade as the line passes through
+   the viewport. Each word's --p (0..1) is set by JS based
+   on its position; we drive opacity from --p.
+   ──────────────────────────────────────────────────────── */
+.scroll-fill { display: block; }
+.scroll-fill .sfw-word {
+  --p: 0;
+  opacity: calc(0.16 + 0.84 * var(--p));
+  transition: opacity 0.12s linear;
+  /* keep inline so wrapping is unchanged */
+}
+/* On dark sections, lift the floor a touch so dim text is still legible */
+.calculators .scroll-fill .sfw-word,
+.pullquote .scroll-fill .sfw-word,
+.cta .scroll-fill .sfw-word {
+  opacity: calc(0.20 + 0.80 * var(--p));
+}
+/* Keep italics legible at the dim floor */
+.scroll-fill em.serif .sfw-word {
+  color: var(--copper);
+  opacity: calc(0.32 + 0.68 * var(--p));
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-fill .sfw-word { opacity: 1 !important; transition: none; }
+}
+
 /* ─── Nav ─────────────────────────────────────────────── */
 .nav {
   position: fixed; top: 0; left: 0; right: 0;

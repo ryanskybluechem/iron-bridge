@@ -6,6 +6,7 @@ import Marquee from "./components/Marquee";
 import Reveal from "./components/Reveal";
 import FAQ from "./components/FAQ";
 import NewsletterForm from "./components/NewsletterForm";
+import ScrollFillText from "./components/ScrollFillText";
 import {
   TaxProjectionCalc,
   RunwayCalc,
@@ -342,19 +343,19 @@ export default function Page() {
         <div className="container">
           <div className="manifesto-grid">
             <div className="manifesto-eyebrow">Our thesis</div>
-            <Reveal>
-              <p className="manifesto-lead">
+            <div>
+              <ScrollFillText className="manifesto-lead">
                 A tax return is a{" "}
                 <em className="serif">historical document.</em> Filing it well
                 is hygiene. Reducing what goes on it next year is strategy —
                 and strategy needs runway.
-              </p>
-              <p className="manifesto-tail">
+              </ScrollFillText>
+              <ScrollFillText className="manifesto-tail" trigger={0.7}>
                 Iron Bridge gives business owners a CFO-grade tax projection by
                 June 1st, then six months to execute against it. That&apos;s
                 the entire game.
-              </p>
-            </Reveal>
+              </ScrollFillText>
+            </div>
           </div>
         </div>
       </section>
@@ -486,11 +487,13 @@ export default function Page() {
         </div>
         <div className="container">
           <div className="quote-mark">“</div>
-          <blockquote className="pq-text">
-            The difference between paying $340,000 and paying $180,000 in taxes
-            wasn&apos;t a loophole. It was{" "}
-            <em className="serif">eight months of lead time.</em>
-          </blockquote>
+          <ScrollFillText className="pq-text" trigger={0.6} band={0.22}>
+            <blockquote>
+              The difference between paying $340,000 and paying $180,000 in
+              taxes wasn&apos;t a loophole. It was{" "}
+              <em className="serif">eight months of lead time.</em>
+            </blockquote>
+          </ScrollFillText>
           <div className="pq-attr">
             <div className="pq-name">Manufacturing client · 2024 engagement</div>
           </div>
