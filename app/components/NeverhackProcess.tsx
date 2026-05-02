@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import ScrollShader from "./ScrollShader";
-import ShaderControls from "./ShaderControls";
 import { DEFAULT_PARAMS, type ShaderParams } from "./shaderParams";
 
 export interface ProcessStep {
@@ -107,7 +106,6 @@ export default function NeverhackProcess({ steps }: Props) {
         <div className="nh-shader" aria-hidden="true">
           <ScrollShader progressRef={progressRef} paramsRef={paramsRef} />
         </div>
-        <ShaderControls paramsRef={paramsRef} />
 
         <div className="nh-cross" aria-hidden="true">
           <div className="nh-cross-h" />

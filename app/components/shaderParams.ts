@@ -30,16 +30,16 @@ export interface ShaderParams {
 }
 
 export const DEFAULT_PARAMS: ShaderParams = {
-  blobSize: 1.2,
-  blobIntensity: 1.55,
+  blobSize: 3.65,
+  blobIntensity: 0.6,
   blobColor: "#d97757",
   bgColor: "#0a0e1a",
-  ambient: 0.18,
-  driftSpeed: 0.04,
-  pathRange: 1.0,
-  vignette: 0.45,
-  grain: 0.008,
-  pearlIntensity: 0.18,
+  ambient: 0,
+  driftSpeed: 0.045,
+  pathRange: 1.16,
+  vignette: 0.3,
+  grain: 0.023,
+  pearlIntensity: 0.38,
 };
 
 /** Convert "#rrggbb" to [r,g,b] in 0..1. */
