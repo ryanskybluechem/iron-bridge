@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ScrollShader from "./ScrollShader";
 
 export interface ProcessStep {
   n: string;
@@ -29,6 +30,7 @@ const DOTS_PER_GAP = 14;
  */
 export default function NeverhackProcess({ steps }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<number>(0);
   const [enabled, setEnabled] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -63,6 +65,7 @@ export default function NeverhackProcess({ steps }: Props) {
       const scrolled = -rect.top;
       const p = Math.max(0, Math.min(1, scrolled / scrollable));
       el.style.setProperty("--p", p.toFixed(4));
+      progressRef.current = p;
 
       // Active step from progress, with a slight forward bias so the new
       // slide commits a touch before the midpoint.
@@ -98,8 +101,9 @@ export default function NeverhackProcess({ steps }: Props) {
       ref={trackRef}
     >
       <div className="nh-stage">
-        <div className="nh-glow nh-glow--a" aria-hidden="true" />
-        <div className="nh-glow nh-glow--b" aria-hidden="true" />
+        <div className="nh-shader" aria-hidden="true">
+          <ScrollShader progressRef={progressRef} />
+        </div>
 
         <div className="nh-cross" aria-hidden="true">
           <div className="nh-cross-h" />
