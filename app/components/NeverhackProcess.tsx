@@ -134,7 +134,11 @@ export default function NeverhackProcess({ steps }: Props) {
                 <span className="nh-slide-weeks">{s.weeks}</span>
               </div>
               <div className="nh-slide-kicker">{s.k}</div>
-              <h3 className="nh-slide-title">{s.t}</h3>
+              <h3 className="nh-slide-title">
+                <span className="nh-slide-title-mask">
+                  <span className="nh-slide-title-inner">{s.t}</span>
+                </span>
+              </h3>
               <p className="nh-slide-desc">{s.d}</p>
             </article>
           ))}

@@ -944,23 +944,40 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   grid-area: 1 / 1;
   max-width: 920px;
   opacity: 0;
-  transform: translate3d(0, 14px, 0);
-  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .nh-slide--active {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
   pointer-events: auto;
 }
 .nh-track--static .nh-slide {
   opacity: 1;
-  transform: none;
   pointer-events: auto;
   position: relative;
   grid-area: auto;
 }
+
+/* Per-element stagger: each child starts hidden, animates in when its
+   slide becomes active. Reverses on deactivation so re-entry replays. */
+.nh-slide-meta,
+.nh-slide-kicker,
+.nh-slide-desc {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nh-slide-meta { transition-delay: 0ms; }
+.nh-slide-kicker { transition-delay: 80ms; }
+.nh-slide-desc { transition-delay: 360ms; }
+.nh-slide--active .nh-slide-meta,
+.nh-slide--active .nh-slide-kicker,
+.nh-slide--active .nh-slide-desc {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
 .nh-slide-meta {
   display: inline-flex;
   align-items: baseline;
@@ -988,6 +1005,8 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   color: var(--copper);
   margin-bottom: 18px;
 }
+
+/* Title rises up from a clip mask when the slide becomes active. */
 .nh-slide-title {
   font-size: clamp(48px, 7.6vw, 116px);
   line-height: 0.96;
@@ -996,12 +1015,44 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   text-wrap: balance;
   max-width: 18ch;
 }
+.nh-slide-title-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+.nh-slide-title-inner {
+  display: block;
+  transform: translate3d(0, 105%, 0);
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+  will-change: transform;
+}
+.nh-slide--active .nh-slide-title-inner {
+  transform: translate3d(0, 0, 0);
+}
+
 .nh-slide-desc {
   margin-top: 32px;
   font-size: clamp(17px, 1.4vw, 21px);
   color: var(--pearl-dim);
   line-height: 1.55;
   max-width: 56ch;
+}
+
+.nh-track--static .nh-slide-meta,
+.nh-track--static .nh-slide-kicker,
+.nh-track--static .nh-slide-desc {
+  opacity: 1;
+  transform: none;
+}
+.nh-track--static .nh-slide-title-inner {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nh-slide-title-inner,
+  .nh-slide-meta,
+  .nh-slide-kicker,
+  .nh-slide-desc { transform: none !important; opacity: 1 !important; transition: none; }
 }
 
 /* Progress bar — 01 ······ 02 ······ 03, copper-fills with --p */
