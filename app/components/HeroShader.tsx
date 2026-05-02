@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { type MutableRefObject, useEffect, useRef } from "react";
+import { DEFAULT_HERO_PARAMS, type HeroParams } from "./heroParams";
 
 export type ShaderVariant = "silk" | "noir" | "velvet" | "iron";
 
@@ -8,6 +9,9 @@ interface HeroShaderProps {
   className?: string;
   intensity?: number;
   variant?: ShaderVariant;
+  /** Optional silk-shader tuning ref. Read every frame; updates uniforms
+   *  without re-rendering. Only used by the silk variant. */
+  paramsRef?: MutableRefObject<HeroParams>;
 }
 
 /* ────────────────────────────────────────────────────────
@@ -52,11 +56,23 @@ const NOISE = `
 
 // Silk — slow horizontal silk-fold drape over deep ink. Pearl highlights
 // fold gently. Suspension cables in faint pearl. No mouse interaction.
+//
+// All visual knobs are exposed as uniforms; the dev-controls panel
+// updates a paramsRef that feeds these every frame.
 const FRAG_SILK = `
   precision highp float;
   uniform vec2 u_res;
   uniform float u_time;
   uniform float u_intensity;
+
+  uniform int u_cableCount;
+  uniform float u_cableBright;
+  uniform float u_cableThick;
+  uniform float u_pearlShimmer;
+  uniform float u_copperKiss;
+  uniform float u_silkIntensity;
+  uniform float u_vignette;
+  uniform float u_grain;
   ${NOISE}
   void main(){
     vec2 p = (gl_FragCoord.xy - 0.5*u_res.xy) / min(u_res.x, u_res.y);
@@ -66,7 +82,7 @@ const FRAG_SILK = `
     float n1 = snoise(vec2(p.x * 0.7, p.y * 2.6 + t * 0.6));
     float n2 = snoise(vec2(p.x * 1.4 + t * 0.4, p.y * 3.4));
     float n3 = fbm(vec2(p.x * 0.5 - t * 0.2, p.y * 1.4));
-    float silk = (n1 * 0.55 + n2 * 0.35 + n3 * 0.10);
+    float silk = (n1 * 0.55 + n2 * 0.35 + n3 * 0.10) * u_silkIntensity;
 
     vec3 ink = vec3(0.034, 0.046, 0.088);
     vec3 graphite = vec3(0.058, 0.072, 0.118);
@@ -75,31 +91,32 @@ const FRAG_SILK = `
 
     vec3 col = mix(ink, graphite, smoothstep(-0.4, 0.4, silk));
     col += pow(smoothstep(0.1, 0.9, silk), 2.4) * vec3(0.13, 0.115, 0.092);
-    col += pow(smoothstep(0.55, 0.95, n2), 4.0) * pearl * 0.18;
+    col += pow(smoothstep(0.55, 0.95, n2), 4.0) * pearl * u_pearlShimmer;
 
-    // Suspension cables in pearl (not copper) — quiet, restrained
+    // Suspension cables — count + brightness + thickness all tunable
     float cables = 0.0;
     for(int i=0;i<5;i++){
+      if (i >= u_cableCount) break;
       float fi = float(i);
       float yy = -0.50 + fi*0.20;
       float bend = 0.18 + 0.025*sin(t*0.9 + fi);
       float arc = yy + bend * (p.x*p.x*1.5);
       float d = abs(p.y - arc);
-      cables += smoothstep(0.008, 0.0, d) * (0.4 + 0.3*sin(fi*1.7));
+      cables += smoothstep(u_cableThick, 0.0, d) * (0.4 + 0.3*sin(fi*1.7));
     }
-    col += cables * pearl * 0.32;
+    col += cables * pearl * u_cableBright;
 
-    // Single warm copper kiss at the bottom-left edge — barely there
-    float kiss = smoothstep(1.1, 0.5, length(p - vec2(-0.6, -0.5))) * 0.06;
+    // Single warm copper kiss at the bottom-left edge
+    float kiss = smoothstep(1.1, 0.5, length(p - vec2(-0.6, -0.5))) * u_copperKiss;
     col += kiss * copper;
 
-    // Soft vignette
+    // Soft vignette (mix between flat and vignetted)
     float vig = smoothstep(1.5, 0.3, length(p*vec2(0.85,1.0)));
-    col *= 0.55 + 0.45*vig;
+    col *= mix(1.0, 0.55 + 0.45*vig, clamp(u_vignette, 0.0, 1.0));
 
     // Grain
     float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453);
-    col += (grain - 0.5) * 0.012;
+    col += (grain - 0.5) * u_grain;
 
     col *= u_intensity;
     gl_FragColor = vec4(col, 1.0);
@@ -259,11 +276,13 @@ export default function HeroShader({
   className = "",
   intensity = 1.0,
   variant = "silk",
+  paramsRef,
 }: HeroShaderProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
   const startRef = useRef<number>(0);
   const mouseRef = useRef({ x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 });
+  const fallbackParamsRef = useRef<HeroParams>({ ...DEFAULT_HERO_PARAMS });
 
   useEffect(() => {
     startRef.current = performance.now();
@@ -313,6 +332,17 @@ export default function HeroShader({
     const uMouse = gl.getUniformLocation(prog, "u_mouse");
     const uInt = gl.getUniformLocation(prog, "u_intensity");
 
+    // Silk-only uniforms (others variants don't declare these so the
+    // location lookups will be null and we'll skip them in the loop).
+    const uCableCount = gl.getUniformLocation(prog, "u_cableCount");
+    const uCableBright = gl.getUniformLocation(prog, "u_cableBright");
+    const uCableThick = gl.getUniformLocation(prog, "u_cableThick");
+    const uPearlShimmer = gl.getUniformLocation(prog, "u_pearlShimmer");
+    const uCopperKiss = gl.getUniformLocation(prog, "u_copperKiss");
+    const uSilkInt = gl.getUniformLocation(prog, "u_silkIntensity");
+    const uVignette = gl.getUniformLocation(prog, "u_vignette");
+    const uGrain = gl.getUniformLocation(prog, "u_grain");
+
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
       const w = canvas.clientWidth * dpr;
@@ -344,6 +374,20 @@ export default function HeroShader({
       gl.uniform1f(uTime, (performance.now() - startRef.current) / 1000);
       if (uMouse) gl.uniform2f(uMouse, m.x, m.y);
       gl.uniform1f(uInt, intensity);
+
+      // Push silk-tunable uniforms when the variant declares them.
+      if (variant === "silk") {
+        const pp = (paramsRef ?? fallbackParamsRef).current;
+        if (uCableCount) gl.uniform1i(uCableCount, Math.max(0, Math.min(5, Math.round(pp.cableCount))));
+        if (uCableBright) gl.uniform1f(uCableBright, pp.cableBrightness);
+        if (uCableThick) gl.uniform1f(uCableThick, pp.cableThickness);
+        if (uPearlShimmer) gl.uniform1f(uPearlShimmer, pp.pearlShimmer);
+        if (uCopperKiss) gl.uniform1f(uCopperKiss, pp.copperKiss);
+        if (uSilkInt) gl.uniform1f(uSilkInt, pp.silkIntensity);
+        if (uVignette) gl.uniform1f(uVignette, pp.vignette);
+        if (uGrain) gl.uniform1f(uGrain, pp.grain);
+      }
+
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -354,7 +398,7 @@ export default function HeroShader({
       if (usesMouse) window.removeEventListener("mousemove", onMove);
       window.removeEventListener("resize", resize);
     };
-  }, [intensity, variant]);
+  }, [intensity, variant, paramsRef]);
 
   return (
     <canvas

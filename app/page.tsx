@@ -1,4 +1,5 @@
 import HeroShaderClient from "./components/HeroShaderClient";
+import HeroShaderTuned from "./components/HeroShaderTuned";
 import HeroBridge from "./components/HeroBridge";
 import HeroStats from "./components/HeroStats";
 import Telemetry from "./components/Telemetry";
@@ -216,7 +217,7 @@ export default function Page() {
       {/* ─── Hero ────────────────────────────────────────────── */}
       <header className="hero">
         <div className="hero-shader">
-          <HeroShaderClient />
+          <HeroShaderTuned />
         </div>
         <HeroBridge />
         <div className="hero-grain" />
