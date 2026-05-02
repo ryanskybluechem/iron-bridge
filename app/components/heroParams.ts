@@ -30,15 +30,15 @@ export interface HeroParams {
 }
 
 export const DEFAULT_HERO_PARAMS: HeroParams = {
-  cableCount: 5,
-  cableBrightness: 0.32,
+  cableCount: 0,
+  cableBrightness: 0.07,
   cableThickness: 0.008,
   pearlShimmer: 0.18,
-  copperKiss: 0.06,
-  silkIntensity: 1.0,
-  vignette: 0.55,
-  grain: 0.012,
-  bridgeOpacity: 0.85,
+  copperKiss: 0.13,
+  silkIntensity: 1.3,
+  vignette: 1,
+  grain: 0.024,
+  bridgeOpacity: 0.14,
   showBridge: true,
-  showTopRule: true,
+  showTopRule: false,
 };
