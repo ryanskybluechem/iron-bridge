@@ -8,7 +8,7 @@ import FAQ from "./components/FAQ";
 import NewsletterForm from "./components/NewsletterForm";
 import ScrollFillText from "./components/ScrollFillText";
 import MaskReveal from "./components/MaskReveal";
-import PinnedProcess from "./components/PinnedProcess";
+import NeverhackProcess from "./components/NeverhackProcess";
 import ProcessIntro from "./components/ProcessIntro";
 import {
   TaxProjectionCalc,
@@ -363,10 +363,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ─── Process (intro slide → pinned scroll) ──────────── */}
+      {/* ─── Process (intro slide → neverhack-style sequence) ── */}
       <section className="process" id="process">
         <ProcessIntro />
-        <PinnedProcess steps={steps} />
+        <NeverhackProcess steps={steps} />
       </section>
 
       {/* ─── Calculators ─────────────────────────────────────── */}

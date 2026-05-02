@@ -770,7 +770,7 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 140px 0 96px;
+  padding: 140px 0 140px;
   position: relative;
 }
 .pi-stage-inner {
@@ -820,105 +820,299 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   line-height: 1.55;
   max-width: 56ch;
 }
-.pi-sequence {
-  margin-top: 72px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  flex-wrap: wrap;
+@media (max-width: 700px) {
+  .pi-stage { min-height: auto; padding: 120px 0 80px; }
 }
-.pi-seq-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1),
-              transform 0.7s cubic-bezier(0.22,1,0.36,1);
-  transition-delay: var(--pid, 1700ms);
+@media (max-width: 900px) {
+  .pi-title { font-size: clamp(40px, 9vw, 64px); }
 }
-.pi-sequence.is-armed .pi-seq-item {
-  opacity: 1;
-  transform: translateY(0);
-}
-.pi-seq-ring {
+
+/* ─── Neverhack-style pinned sequence ───────────────────
+   Track is multi-screen tall; the inner stage is sticky-
+   pinned and crossfades between numbered slides. A
+   copper-pearl glow morphs across the canvas; a hairline
+   cross divides the stage into quadrants; a dotted
+   01 …… 02 …… 03 progress sits at the bottom.
+   ──────────────────────────────────────────────────────── */
+.nh-track {
   position: relative;
-  width: 44px; height: 44px;
+  height: 320vh;
+  background: var(--ink);
+  color: var(--pearl);
+}
+.nh-track--static { height: auto; }
+.nh-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+}
+.nh-track--static .nh-stage {
+  position: static;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 64px 0;
+}
+
+/* Glow blobs — interpolated quadratic curve via --p so the
+   light migrates corner→corner→corner across the section. */
+.nh-glow {
+  position: absolute;
+  width: 92vmax;
+  height: 92vmax;
   border-radius: 50%;
-  border: 1px solid var(--copper);
-  display: grid; place-items: center;
-  background: rgba(217,119,87,0.04);
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
 }
-.pi-seq-num {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: var(--copper);
+.nh-glow--a {
+  background: radial-gradient(
+    circle,
+    rgba(217, 119, 87, 0.55),
+    rgba(217, 119, 87, 0) 60%
+  );
+  /* p=0 → bottom-left, p=0.5 → top-right, p=1 → bottom-right */
+  --gx: calc(
+    -32vw +
+    var(--p, 0) * 90vw +
+    var(--p, 0) * var(--p, 0) * 18vw
+  );
+  --gy: calc(
+    62vh -
+    var(--p, 0) * 110vh +
+    var(--p, 0) * var(--p, 0) * 90vh
+  );
+  left: var(--gx);
+  top: var(--gy);
+  opacity: 0.85;
 }
-.pi-seq-name {
+.nh-glow--b {
+  background: radial-gradient(
+    circle,
+    rgba(245, 235, 220, 0.18),
+    rgba(245, 235, 220, 0) 60%
+  );
+  width: 60vmax;
+  height: 60vmax;
+  filter: blur(60px);
+  left: calc(72vw - var(--p, 0) * 100vw);
+  top: calc(-30vh + var(--p, 0) * 90vh);
+  opacity: 0.7;
+}
+
+/* Hairline quadrant frame */
+.nh-cross {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.nh-cross-h,
+.nh-cross-v {
+  position: absolute;
+  background: rgba(245, 235, 220, 0.07);
+}
+.nh-cross-h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+}
+.nh-cross-v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+/* Corner labels — small monospace tags in opposite corners */
+.nh-corner {
+  position: absolute;
+  z-index: 3;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pearl-dimmer);
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+.nh-corner--tl {
+  top: 28px;
+  left: 32px;
+}
+.nh-corner--tl span:first-child { color: var(--copper); }
+.nh-corner--tr {
+  top: 28px;
+  right: 32px;
+}
+
+/* Slide stack — all slides occupy the same grid cell, only the
+   active one is opacity 1; others fade out and lift up slightly. */
+.nh-slides {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  justify-items: start;
+  height: 100%;
+  padding: 0 64px;
+  max-width: 1240px;
+  margin: 0 auto;
+  width: 100%;
+}
+.nh-track--static .nh-slides {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+  padding: 0 32px;
+}
+.nh-slide {
+  grid-area: 1 / 1;
+  max-width: 920px;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.nh-slide--active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+.nh-track--static .nh-slide {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  position: relative;
+  grid-area: auto;
+}
+.nh-slide-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 14px 6px 12px;
+  border: 1px solid rgba(245, 235, 220, 0.16);
+  border-radius: 999px;
+  background: rgba(10, 14, 26, 0.4);
+  backdrop-filter: blur(8px);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--on-bg);
-  margin-right: 24px;
+  color: var(--pearl-dim);
+  margin-bottom: 28px;
 }
-.pi-seq-line {
-  width: 56px;
-  height: 1px;
-  background: var(--copper);
-  margin-right: 24px;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
-  transition-delay: var(--pid, 1820ms);
-  opacity: 0.55;
+.nh-slide-num { color: var(--copper); }
+.nh-slide-sep { color: var(--pearl-dimmer); opacity: 0.6; }
+.nh-slide-weeks { color: var(--pearl-dim); }
+.nh-slide-kicker {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 18px;
 }
-.pi-sequence.is-armed .pi-seq-line {
-  transform: scaleX(1);
+.nh-slide-title {
+  font-size: clamp(48px, 7.6vw, 116px);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  font-weight: 480;
+  text-wrap: balance;
+  max-width: 18ch;
 }
-.pi-cue {
+.nh-slide-desc {
+  margin-top: 32px;
+  font-size: clamp(17px, 1.4vw, 21px);
+  color: var(--pearl-dim);
+  line-height: 1.55;
+  max-width: 56ch;
+}
+
+/* Progress bar — 01 ······ 02 ······ 03, copper-fills with --p */
+.nh-progress {
   position: absolute;
   bottom: 56px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  opacity: 0;
-  animation: pi-cue-in 0.6s ease-out 2.6s forwards;
-}
-@keyframes pi-cue-in {
-  to { opacity: 0.7; }
-}
-.pi-cue-line {
-  width: 1px;
-  height: 36px;
-  background: linear-gradient(to bottom, transparent, var(--on-bg-dim));
-  animation: pi-cue-pulse 2.2s ease-in-out 2.6s infinite;
-  transform-origin: top;
-}
-@keyframes pi-cue-pulse {
-  0%, 100% { opacity: 0.5; transform: scaleY(0.6); }
-  50% { opacity: 1; transform: scaleY(1); }
-}
-.pi-cue-text {
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--on-bg-dimmer);
+  gap: 18px;
+  z-index: 4;
   font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.18em;
 }
+.nh-track--static .nh-progress { display: none; }
+.nh-progress-group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.nh-progress-num {
+  color: var(--pearl-dimmer);
+  transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              text-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nh-progress-num--on {
+  color: var(--copper);
+  text-shadow: 0 0 18px rgba(217, 119, 87, 0.55);
+}
+.nh-progress-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.nh-progress-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  /* Each dot has a threshold --t; when --p crosses it, the dot lights up
+     in copper. Smooth 0%→100% transition over a small window. */
+  background: color-mix(
+    in srgb,
+    var(--copper)
+      clamp(
+        0%,
+        calc((var(--p, 0) - var(--t, 0)) * 1200%),
+        100%
+      ),
+    rgba(245, 235, 220, 0.18)
+  );
+  box-shadow: 0 0 0 0 rgba(217, 119, 87, 0);
+  transition: box-shadow 0.4s ease;
+}
+
+/* Static fallback when section can't pin (small screens) */
+.nh-track--static .nh-glow,
+.nh-track--static .nh-cross,
+.nh-track--static .nh-corner {
+  display: none;
+}
+.nh-track--static {
+  background: var(--ink);
+  padding: 48px 0;
+}
+.nh-track--static .nh-slide {
+  background: linear-gradient(180deg, rgba(245,235,220,0.04), rgba(245,235,220,0.01));
+  border: 1px solid rgba(245,235,220,0.1);
+  border-radius: 22px;
+  padding: 36px 28px;
+  max-width: none;
+  width: 100%;
+}
+.nh-track--static .nh-slide-title { font-size: clamp(32px, 7vw, 48px); }
+
 @media (max-width: 700px) {
-  .pi-stage { min-height: auto; padding: 120px 0 64px; }
-  .pi-cue { display: none; }
-  .pi-sequence { gap: 12px; margin-top: 48px; }
-  .pi-seq-line { width: 24px; margin-right: 12px; }
-  .pi-seq-name { margin-right: 12px; }
-}
-@media (max-width: 900px) {
-  .pi-title { font-size: clamp(40px, 9vw, 64px); }
+  .nh-corner { font-size: 9.5px; }
+  .nh-corner--tl { top: 18px; left: 20px; }
+  .nh-corner--tr { top: 18px; right: 20px; }
 }
 .pp-track {
   position: relative;
