@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import ScrollShader from "./ScrollShader";
+import ShaderControls from "./ShaderControls";
+import { DEFAULT_PARAMS, type ShaderParams } from "./shaderParams";
 
 export interface ProcessStep {
   n: string;
@@ -31,6 +33,7 @@ const DOTS_PER_GAP = 14;
 export default function NeverhackProcess({ steps }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<number>(0);
+  const paramsRef = useRef<ShaderParams>({ ...DEFAULT_PARAMS });
   const [enabled, setEnabled] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -102,8 +105,9 @@ export default function NeverhackProcess({ steps }: Props) {
     >
       <div className="nh-stage">
         <div className="nh-shader" aria-hidden="true">
-          <ScrollShader progressRef={progressRef} />
+          <ScrollShader progressRef={progressRef} paramsRef={paramsRef} />
         </div>
+        <ShaderControls paramsRef={paramsRef} />
 
         <div className="nh-cross" aria-hidden="true">
           <div className="nh-cross-h" />
