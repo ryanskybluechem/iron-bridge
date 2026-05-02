@@ -108,6 +108,34 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   .mask-reveal-inner { transform: none !important; }
 }
 
+/* ─── Split-mask: word-by-word reveal ───────────────────
+   Each word becomes inline-block with overflow:hidden,
+   inner span lifts up from below with a per-word stagger.
+   Inline elements (em.serif etc.) are preserved.
+   ──────────────────────────────────────────────────────── */
+.split-mask {
+  display: inline;
+}
+.split-mask .sm-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.05;
+}
+.split-mask .sm-word-inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--smd, 0ms);
+  will-change: transform;
+}
+.split-mask.is-shown .sm-word-inner {
+  transform: translate3d(0, 0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .split-mask .sm-word-inner { transform: none !important; transition: none; }
+}
+
 /* ─── Scroll-fill text ─────────────────────────────────
    Apple-style word-by-word fade as the line passes through
    the viewport. Each word's --p (0..1) is set by JS based
@@ -727,16 +755,170 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
 }
 .section-head-center .section-lede { margin-left: auto; margin-right: auto; }
 
-/* ─── Process (pinned scroll) ──────────────────────────
-   The track is taller than the viewport; the inner stage
-   is sticky-positioned so it pins while the user scrolls.
-   Scroll progress drives which step is active and how far
-   the bottom timeline ruler has filled.
+/* ─── Process: intro slide → pinned scroll ─────────────
+   Two acts: a 100vh editorial intro (eyebrow + headline +
+   sequenced 01→02→03), then the pinned-scroll cards.
    ──────────────────────────────────────────────────────── */
 .process {
-  padding: 120px 0 0;
   background: var(--bg);
   position: relative;
+}
+
+/* Intro slide */
+.pi-stage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 140px 0 96px;
+  position: relative;
+}
+.pi-stage-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+.pi-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--copper);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  margin-bottom: 28px;
+}
+.pi-eyebrow::before {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: var(--copper);
+  display: inline-block;
+  transform-origin: left;
+  animation: pi-rule-grow 0.8s cubic-bezier(0.22,1,0.36,1) 0.05s forwards;
+  transform: scaleX(0);
+}
+@keyframes pi-rule-grow {
+  to { transform: scaleX(1); }
+}
+.pi-title {
+  font-size: clamp(56px, 9.4vw, 132px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 480;
+  max-width: 18ch;
+  text-wrap: balance;
+}
+.pi-title em.serif { font-size: 1.04em; }
+.pi-lede {
+  display: block;
+  margin-top: 36px;
+  font-size: clamp(17px, 1.5vw, 21px);
+  color: var(--on-bg-dim);
+  line-height: 1.55;
+  max-width: 56ch;
+}
+.pi-sequence {
+  margin-top: 72px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.pi-seq-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1),
+              transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  transition-delay: var(--pid, 1700ms);
+}
+.pi-sequence.is-armed .pi-seq-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pi-seq-ring {
+  position: relative;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--copper);
+  display: grid; place-items: center;
+  background: rgba(217,119,87,0.04);
+}
+.pi-seq-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--copper);
+}
+.pi-seq-name {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--on-bg);
+  margin-right: 24px;
+}
+.pi-seq-line {
+  width: 56px;
+  height: 1px;
+  background: var(--copper);
+  margin-right: 24px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  transition-delay: var(--pid, 1820ms);
+  opacity: 0.55;
+}
+.pi-sequence.is-armed .pi-seq-line {
+  transform: scaleX(1);
+}
+.pi-cue {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: pi-cue-in 0.6s ease-out 2.6s forwards;
+}
+@keyframes pi-cue-in {
+  to { opacity: 0.7; }
+}
+.pi-cue-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, var(--on-bg-dim));
+  animation: pi-cue-pulse 2.2s ease-in-out 2.6s infinite;
+  transform-origin: top;
+}
+@keyframes pi-cue-pulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+.pi-cue-text {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-bg-dimmer);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (max-width: 700px) {
+  .pi-stage { min-height: auto; padding: 120px 0 64px; }
+  .pi-cue { display: none; }
+  .pi-sequence { gap: 12px; margin-top: 48px; }
+  .pi-seq-line { width: 24px; margin-right: 12px; }
+  .pi-seq-name { margin-right: 12px; }
+}
+@media (max-width: 900px) {
+  .pi-title { font-size: clamp(40px, 9vw, 64px); }
 }
 .pp-track {
   position: relative;
@@ -869,36 +1051,51 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   line-height: 1.6;
 }
 
-/* Timeline ruler */
+/* Timeline ruler — driven by transform (no lag), with phase pill,
+   active-month highlight, and a sweeping fill. */
 .pp-timeline {
   position: relative;
   margin-top: 56px;
-  padding: 0 24px 8px;
-  height: 60px;
+  padding: 64px 24px 8px;
+  height: 130px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
+  container-type: inline-size;
 }
 .pp-timeline-rail {
   position: absolute;
   left: 24px; right: 24px;
-  top: 12px;
+  top: 76px;
   height: 1px;
   background: var(--on-bg-line);
 }
 .pp-timeline-fill {
   position: absolute;
   left: 24px;
-  top: 12px;
+  right: 24px;
+  top: 76px;
   height: 1px;
-  max-width: calc(100% - 48px);
-  background: var(--copper);
-  box-shadow: 0 0 14px rgba(217,119,87,0.7);
-  transition: width 0.18s linear;
+  background: linear-gradient(to right, rgba(217,119,87,0.4), var(--copper));
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+  box-shadow: 0 0 14px rgba(217,119,87,0.55);
+  will-change: transform;
 }
+.pp-timeline-fill::after {
+  /* leading-edge bright spot */
+  content: "";
+  position: absolute;
+  right: 0; top: -2px;
+  width: 24px; height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(217,119,87,0.9), transparent 70%);
+  filter: blur(2px);
+}
+
 .pp-timeline-ticks {
   position: absolute;
   left: 24px; right: 24px;
-  top: 0;
-  height: 100%;
+  top: 64px;
+  height: 50px;
 }
 .pp-timeline-tick {
   position: absolute;
@@ -908,51 +1105,120 @@ em.serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  pointer-events: none;
 }
 .pp-timeline-tick-mark {
   width: 1px;
-  height: 12px;
+  height: 14px;
+  margin-top: 6px;
   background: var(--on-bg-line-strong);
+  transition: height 0.4s cubic-bezier(0.22,1,0.36,1), background 0.4s ease;
 }
 .pp-timeline-tick-label {
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--on-bg-dimmer);
-  margin-top: 14px;
+  margin-top: 10px;
+  transition: color 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1);
 }
+.pp-timeline-tick--past .pp-timeline-tick-mark { background: rgba(217,119,87,0.55); }
+.pp-timeline-tick--past .pp-timeline-tick-label { color: var(--on-bg-dim); }
+.pp-timeline-tick--active .pp-timeline-tick-mark {
+  background: var(--copper);
+  height: 20px;
+  margin-top: 0;
+  box-shadow: 0 0 10px rgba(217,119,87,0.7);
+}
+.pp-timeline-tick--active .pp-timeline-tick-label {
+  color: var(--copper);
+  transform: translateY(2px);
+}
+
+/* Cursor: position driven by --p (set on the track), no transition lag.
+   Translates from rail-start to rail-end, accounting for the 24px padding
+   on either side of the timeline. The cursor element itself fills the
+   timeline vertically; children position relative to it. */
 .pp-timeline-cursor {
   position: absolute;
-  left: 24px;
+  left: 0;
   top: 0;
+  height: 100%;
   width: 0;
   pointer-events: none;
-  transition: left 0.18s linear;
+  will-change: transform;
+  transform: translate3d(
+    calc(24px + var(--p, 0) * (100cqi - 48px)),
+    0, 0
+  );
+}
+.pp-timeline-pill {
+  position: absolute;
+  bottom: 78px;
+  left: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--pearl);
+  border: 1px solid rgba(217,119,87,0.35);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  box-shadow: 0 12px 28px -10px rgba(0,0,0,0.35);
+}
+.pp-timeline-pill::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px; height: 8px;
+  background: var(--ink);
+  border-right: 1px solid rgba(217,119,87,0.35);
+  border-bottom: 1px solid rgba(217,119,87,0.35);
+}
+.pp-timeline-pill-num { color: var(--copper); }
+.pp-timeline-pill-text { color: var(--pearl); }
+.pp-timeline-cursor-stem {
+  position: absolute;
+  bottom: 64px;
+  left: 0;
+  width: 1px;
+  height: 12px;
+  background: var(--copper);
+  opacity: 0.6;
 }
 .pp-timeline-cursor-dot {
   position: absolute;
-  top: 7px;
-  left: -5px;
-  width: 10px;
-  height: 10px;
+  top: 71px;
+  left: 0;
+  transform: translateX(-50%);
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: var(--copper);
-  box-shadow: 0 0 0 2px var(--bg), 0 0 18px rgba(217,119,87,0.7);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 18px rgba(217,119,87,0.7);
 }
 .pp-timeline-cursor-pulse {
   position: absolute;
-  top: 4px;
-  left: -8px;
-  width: 16px;
-  height: 16px;
+  top: 67px;
+  left: 0;
+  transform: translateX(-50%);
+  width: 19px;
+  height: 19px;
   border-radius: 50%;
   border: 1px solid var(--copper);
-  opacity: 0.5;
   animation: pp-cursor-pulse 1.6s ease-out infinite;
+  pointer-events: none;
 }
 @keyframes pp-cursor-pulse {
-  0% { transform: scale(0.6); opacity: 0.7; }
-  100% { transform: scale(1.7); opacity: 0; }
+  0% { transform: translateX(-50%) scale(0.5); opacity: 0.7; }
+  100% { transform: translateX(-50%) scale(1.7); opacity: 0; }
 }
 
 @media (max-width: 900px) {

@@ -29,18 +29,13 @@ const monthLabels = [
   "Dec",
 ];
 
-/**
- * Pinned scroll: the .pp-track is tall (multi-viewport), the inner stage
- * sticks at top:0 while the user scrolls through. Scroll progress drives
- * which step is "active" and how filled the timeline ruler is.
- */
 export default function PinnedProcess({ steps }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
   const [enabled, setEnabled] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [activeMonthIdx, setActiveMonthIdx] = useState(0);
 
   useEffect(() => {
-    // Disable pin behavior on small viewports (cards stack vertically instead).
     const mq = window.matchMedia("(max-width: 900px)");
     const sync = () => setEnabled(!mq.matches);
     sync();
@@ -49,37 +44,61 @@ export default function PinnedProcess({ steps }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
-      setProgress(0);
-      return;
-    }
-    const update = () => {
+    if (!enabled) return;
+
+    let prevActive = -1;
+    let prevMonth = -1;
+    let raf = 0;
+    let queued = false;
+
+    const compute = () => {
+      queued = false;
       const el = trackRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const scrollable = el.offsetHeight - window.innerHeight;
       if (scrollable <= 0) {
-        setProgress(0);
+        el.style.setProperty("--p", "0");
         return;
       }
       const scrolled = -rect.top;
       const p = Math.max(0, Math.min(1, scrolled / scrollable));
-      setProgress(p);
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [enabled]);
 
-  // 3 steps → segments [0, 0.33), [0.33, 0.66), [0.66, 1]
-  // active idx via progress
-  const activeIdx = enabled
-    ? Math.min(steps.length - 1, Math.floor(progress * steps.length + 0.0001))
-    : -1; // -1 → all visible (mobile)
+      // Drive fill + cursor from a single CSS variable; no React work per frame.
+      el.style.setProperty("--p", p.toFixed(4));
+
+      const newActive = Math.min(
+        steps.length - 1,
+        Math.floor(p * steps.length + 0.0001)
+      );
+      if (newActive !== prevActive) {
+        prevActive = newActive;
+        setActiveIdx(newActive);
+      }
+      const newMonth = Math.max(0, Math.min(11, Math.round(p * 11)));
+      if (newMonth !== prevMonth) {
+        prevMonth = newMonth;
+        setActiveMonthIdx(newMonth);
+      }
+    };
+
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      raf = requestAnimationFrame(compute);
+    };
+
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [enabled, steps.length]);
+
+  const activeStep = enabled ? steps[activeIdx] : null;
 
   return (
     <div
@@ -89,13 +108,6 @@ export default function PinnedProcess({ steps }: Props) {
       <div className="pp-stage">
         <div className="pp-grid">
           {steps.map((s, i) => {
-            // per-step progress 0..1 within its segment
-            const segStart = i / steps.length;
-            const segEnd = (i + 1) / steps.length;
-            const segP = Math.max(
-              0,
-              Math.min(1, (progress - segStart) / (segEnd - segStart))
-            );
             const isActive = enabled ? activeIdx === i : true;
             const isPast = enabled ? activeIdx > i : false;
             return (
@@ -106,7 +118,6 @@ export default function PinnedProcess({ steps }: Props) {
                   (isActive ? " pp-step--active" : "") +
                   (isPast ? " pp-step--past" : "")
                 }
-                style={{ ["--seg-p" as string]: segP.toFixed(3) }}
               >
                 <div className="pp-step-marker">
                   <span className="pp-step-marker-num">{s.n}</span>
@@ -123,26 +134,39 @@ export default function PinnedProcess({ steps }: Props) {
 
         <div className="pp-timeline" aria-hidden="true">
           <div className="pp-timeline-rail" />
-          <div
-            className="pp-timeline-fill"
-            style={{ width: `${progress * 100}%` }}
-          />
+          <div className="pp-timeline-fill" />
+
           <div className="pp-timeline-ticks">
-            {monthLabels.map((m, i) => (
-              <div
-                className="pp-timeline-tick"
-                key={m}
-                style={{ left: `${(i / 11) * 100}%` }}
-              >
-                <span className="pp-timeline-tick-mark" />
-                <span className="pp-timeline-tick-label">{m}</span>
-              </div>
-            ))}
+            {monthLabels.map((m, i) => {
+              const isActive = enabled && i === activeMonthIdx;
+              const isPast = enabled && i < activeMonthIdx;
+              return (
+                <div
+                  className={
+                    "pp-timeline-tick" +
+                    (isActive ? " pp-timeline-tick--active" : "") +
+                    (isPast ? " pp-timeline-tick--past" : "")
+                  }
+                  key={m}
+                  style={{ left: `${(i / 11) * 100}%` }}
+                >
+                  <span className="pp-timeline-tick-mark" />
+                  <span className="pp-timeline-tick-label">{m}</span>
+                </div>
+              );
+            })}
           </div>
-          <div
-            className="pp-timeline-cursor"
-            style={{ left: `${progress * 100}%` }}
-          >
+
+          <div className="pp-timeline-cursor">
+            <div className="pp-timeline-pill">
+              <span className="pp-timeline-pill-num">
+                {activeStep?.n ?? "01"}
+              </span>
+              <span className="pp-timeline-pill-text">
+                {(activeStep?.k ?? "Plan").toUpperCase()}
+              </span>
+            </div>
+            <span className="pp-timeline-cursor-stem" />
             <span className="pp-timeline-cursor-dot" />
             <span className="pp-timeline-cursor-pulse" />
           </div>

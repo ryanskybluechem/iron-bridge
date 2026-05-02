@@ -9,6 +9,7 @@ import NewsletterForm from "./components/NewsletterForm";
 import ScrollFillText from "./components/ScrollFillText";
 import MaskReveal from "./components/MaskReveal";
 import PinnedProcess from "./components/PinnedProcess";
+import ProcessIntro from "./components/ProcessIntro";
 import {
   TaxProjectionCalc,
   RunwayCalc,
@@ -362,22 +363,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ─── Process (pinned scroll) ────────────────────────── */}
+      {/* ─── Process (intro slide → pinned scroll) ──────────── */}
       <section className="process" id="process">
-        <div className="container">
-          <MaskReveal>
-            <div className="section-head">
-              <div className="section-eyebrow">The Iron Bridge method</div>
-              <h2 className="section-title">
-                Three steps. <em className="serif">Six months</em> of leverage.
-              </h2>
-              <p className="section-lede">
-                A single sequenced engagement that turns reactive year-end tax
-                prep into proactive multi-quarter strategy.
-              </p>
-            </div>
-          </MaskReveal>
-        </div>
+        <ProcessIntro />
         <PinnedProcess steps={steps} />
       </section>
 
