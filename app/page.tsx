@@ -7,6 +7,8 @@ import Reveal from "./components/Reveal";
 import FAQ from "./components/FAQ";
 import NewsletterForm from "./components/NewsletterForm";
 import ScrollFillText from "./components/ScrollFillText";
+import MaskReveal from "./components/MaskReveal";
+import PinnedProcess from "./components/PinnedProcess";
 import {
   TaxProjectionCalc,
   RunwayCalc,
@@ -277,7 +279,7 @@ export default function Page() {
       {/* ─── By the numbers ──────────────────────────────────── */}
       <section className="numbers">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head section-head-row">
               <div>
                 <div className="section-eyebrow">By the numbers</div>
@@ -292,7 +294,7 @@ export default function Page() {
                 drawn from anonymized client data, refreshed quarterly.
               </p>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="numbers-grid">
             {[
@@ -360,10 +362,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ─── Process ─────────────────────────────────────────── */}
+      {/* ─── Process (pinned scroll) ────────────────────────── */}
       <section className="process" id="process">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head">
               <div className="section-eyebrow">The Iron Bridge method</div>
               <h2 className="section-title">
@@ -374,46 +376,15 @@ export default function Page() {
                 prep into proactive multi-quarter strategy.
               </p>
             </div>
-          </Reveal>
-
-          <div className="steps">
-            <svg
-              className="steps-rail"
-              viewBox="0 0 1200 40"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <line
-                x1="60"
-                y1="20"
-                x2="1140"
-                y2="20"
-                stroke="rgba(217,119,87,0.35)"
-                strokeDasharray="2 6"
-                strokeLinecap="round"
-              />
-            </svg>
-
-            {steps.map((s, i) => (
-              <Reveal key={s.n} delay={i * 100} className="step">
-                <div className="step-marker">
-                  <span className="step-marker-num">{s.n}</span>
-                  <span className="step-marker-ring" />
-                </div>
-                <div className="step-weeks">{s.weeks}</div>
-                <div className="step-kicker">{s.k}</div>
-                <h3 className="step-title">{s.t}</h3>
-                <p className="step-desc">{s.d}</p>
-              </Reveal>
-            ))}
-          </div>
+          </MaskReveal>
         </div>
+        <PinnedProcess steps={steps} />
       </section>
 
       {/* ─── Calculators ─────────────────────────────────────── */}
       <section className="calculators" id="calculators">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head section-head-center">
               <div className="section-eyebrow">Interactive tools</div>
               <h2 className="section-title">
@@ -425,7 +396,7 @@ export default function Page() {
                 flow.
               </p>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="calc-grid">
             <Reveal>
@@ -450,14 +421,14 @@ export default function Page() {
       {/* ─── Services ────────────────────────────────────────── */}
       <section className="services" id="services">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head">
               <div className="section-eyebrow">CFO services</div>
               <h2 className="section-title">
                 Beyond accounting. <em className="serif">Strategic finance.</em>
               </h2>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="services-grid">
             {services.map((s, i) => (
@@ -503,7 +474,7 @@ export default function Page() {
       {/* ─── Case studies ───────────────────────────────────── */}
       <section className="cases" id="cases">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head section-head-row">
               <div>
                 <div className="section-eyebrow">Case studies</div>
@@ -519,7 +490,7 @@ export default function Page() {
                 strategy.
               </p>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="case-grid">
             {cases.map((c, i) => {
@@ -596,7 +567,7 @@ export default function Page() {
       {/* ─── Team ────────────────────────────────────────────── */}
       <section className="team" id="team">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head">
               <div className="section-eyebrow">The team</div>
               <h2 className="section-title">
@@ -604,7 +575,7 @@ export default function Page() {
                 <em className="serif">first.</em>
               </h2>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="team-grid">
             <div className="team-card">
@@ -720,7 +691,7 @@ export default function Page() {
       {/* ─── FAQ ────────────────────────────────────────────── */}
       <section className="faq" id="faq">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head section-head-row">
               <div>
                 <div className="section-eyebrow">Frequently asked</div>
@@ -733,7 +704,7 @@ export default function Page() {
                 up front so we can spend the call on your books, not ours.
               </p>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <Reveal delay={80}>
             <FAQ />
@@ -744,7 +715,7 @@ export default function Page() {
       {/* ─── Articles preview ────────────────────────────────── */}
       <section className="articles" id="articles">
         <div className="container">
-          <Reveal>
+          <MaskReveal>
             <div className="section-head section-head-row">
               <div>
                 <div className="section-eyebrow">Insights</div>
@@ -756,7 +727,7 @@ export default function Page() {
                 All articles <span>→</span>
               </a>
             </div>
-          </Reveal>
+          </MaskReveal>
 
           <div className="articles-grid">
             {articles.map((a, i) => (

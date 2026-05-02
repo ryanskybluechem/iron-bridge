@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import RollingNumber from "./RollingNumber";
 
 const STORAGE_KEY = "ib_telemetry_pos_v1";
 const months = [
@@ -194,19 +195,31 @@ export default function Telemetry() {
         <div className="telemetry-row">
           <span className="telemetry-label">Status quo liability</span>
           <span className="telemetry-value telemetry-value--strike">
-            ${projected.toLocaleString("en-US")}
+            <RollingNumber
+              value={projected}
+              format={(n) => "$" + n.toLocaleString("en-US")}
+              duration={650}
+            />
           </span>
         </div>
         <div className="telemetry-row">
           <span className="telemetry-label">Post-strategy liability</span>
           <span className="telemetry-value">
-            ${optimized.toLocaleString("en-US")}
+            <RollingNumber
+              value={optimized}
+              format={(n) => "$" + n.toLocaleString("en-US")}
+              duration={650}
+            />
           </span>
         </div>
         <div className="telemetry-row telemetry-row--accent">
           <span className="telemetry-label">Median client savings</span>
           <span className="telemetry-value telemetry-value--accent">
-            ${saved.toLocaleString("en-US")}
+            <RollingNumber
+              value={saved}
+              format={(n) => "$" + n.toLocaleString("en-US")}
+              duration={650}
+            />
           </span>
         </div>
       </div>

@@ -1,35 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import RollingNumber from "./RollingNumber";
 
 export default function HeroStats() {
-  const [loans, setLoans] = useState(0);
-  const [taxes, setTaxes] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    let r1 = 0;
-    let r2 = 0;
-    const target1 = 240;
-    const target2 = 38_000_000;
-    const id = setInterval(() => {
-      r1 = Math.min(target1, r1 + target1 / 40);
-      r2 = Math.min(target2, r2 + target2 / 40);
-      setLoans(r1);
-      setTaxes(r2);
-      if (r1 >= target1 && r2 >= target2) clearInterval(id);
-    }, 30);
-    return () => clearInterval(id);
+    // Slight delay so the roll-in plays after the hero has settled
+    const id = setTimeout(() => setMounted(true), 220);
+    return () => clearTimeout(id);
   }, []);
 
   return (
     <div className="hero-stats">
       <div className="stat">
-        <div className="stat-num">${Math.round(loans)}M+</div>
+        <div className="stat-num">
+          <RollingNumber
+            value={mounted ? 240 : 0}
+            format={(n) => `$${n}M+`}
+            duration={1400}
+          />
+        </div>
         <div className="stat-label">Loans approved</div>
       </div>
       <div className="stat-div" />
       <div className="stat">
-        <div className="stat-num">${(taxes / 1_000_000).toFixed(1)}M+</div>
+        <div className="stat-num">
+          <RollingNumber
+            value={mounted ? 380 : 0}
+            format={(n) => `$${(n / 10).toFixed(1)}M+`}
+            duration={1500}
+          />
+        </div>
         <div className="stat-label">Taxes saved</div>
       </div>
       <div className="stat-div" />

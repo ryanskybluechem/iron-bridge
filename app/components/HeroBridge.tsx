@@ -57,27 +57,6 @@ export default function HeroBridge() {
         strokeWidth="1"
       />
 
-      {/* Vertical hangers — generated as repeated rect strokes */}
-      {Array.from({ length: 36 }).map((_, i) => {
-        const x = (i / 35) * 1440;
-        // simple parabolic approximation matching the primary cable
-        const t = (x - 720) / 720;
-        const y = 360 + Math.pow(t, 2) * 100 - 80;
-        return (
-          <line
-            key={i}
-            className="hb-hanger"
-            x1={x}
-            y1={y}
-            x2={x}
-            y2={478}
-            stroke="rgba(245,235,220,0.18)"
-            strokeWidth="0.5"
-            style={{ animationDelay: `${(i / 35) * 1.2 + 0.4}s` }}
-          />
-        );
-      })}
-
       {/* Two towers */}
       <rect
         className="hb-tower"
